@@ -17,9 +17,11 @@ const emailVerificationTokenSchema = new Schema<
   Methods
 >({
   owner: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+    owner: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
   },
   token: {
     type: String,
