@@ -11,14 +11,10 @@ interface Methods {
   compareToken(token: string): Promise<boolean>;
 }
 
-interface Methods {
-  compareToken(token: string): Promise<boolean>;
-}
-
 const emailVerificationTokenSchema = new Schema<
   EmailVerificationTokenDocument,
   {},
-  EmailVerificationTokenDocument
+  Methods
 >({
   owner: {
     type: Schema.Types.ObjectId,
