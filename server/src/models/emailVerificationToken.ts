@@ -1,5 +1,3 @@
-// intervace (typescript)
-
 import { Model, ObjectId, Schema, model } from "mongoose";
 
 interface EmailVerificationTokenDocument {
@@ -12,8 +10,8 @@ const emailVerificationTokenSchema = new Schema<EmailVerificationTokenDocument>(
   {
     owner: {
       type: Schema.Types.ObjectId,
-      ref: "User",
       required: true,
+      ref: "User",
     },
     token: {
       type: String,

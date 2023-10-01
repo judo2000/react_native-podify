@@ -2,8 +2,11 @@ import { RequestHandler } from "express";
 import nodemailer from "nodemailer";
 
 import User from "#/models/user";
+import EmailVerificationToken from "#/models/emailVerificationToken";
 import { CreateUser } from "#/@types/user";
 import { MAILTRAP_USER, MAILTRAP_PASS } from "#/utils/variables";
+import { generateToken } from "#/utils/helper";
+
 export const create: RequestHandler = async (req: CreateUser, res) => {
   const { name, email, password } = req.body;
 
@@ -18,10 +21,17 @@ export const create: RequestHandler = async (req: CreateUser, res) => {
       pass: MAILTRAP_PASS,
     },
   });
+
+  const token = generateToken();
+  await EmailVerificationToken.create({
+    owner: user._id,
+    token,
+  });
+
   transport.sendMail({
     to: user.email,
     from: "auth@myapp.com",
-    html: "<h1>Podify Verification</h1>",
+    html: `<h1>Your verification token is ${token}</h1>`,
   });
   res.status(201).json({ user });
 };
