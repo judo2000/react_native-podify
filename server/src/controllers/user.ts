@@ -102,9 +102,27 @@ export const generateForgetPasswordLink: RequestHandler = async (req, res) => {
     token,
   });
 
-  const resetLink = `${PASSWORD_RESET_LINK}?token=${token}&id=${user._id}`;
+  const resetLink = `${PASSWORD_RESET_LINK}?token=${token}&userId=${user._id}`;
 
   sendForgetPasswordLink({ email: user.email, link: resetLink });
 
   res.json({ message: "Check your email!" });
+};
+
+export const isValidPassResetToken: RequestHandler = async (req, res) => {
+  const { token, userId } = req.body;
+
+  const resetToken = await PasswordResetToken.findOne({ owner: userId });
+  if (!resetToken)
+    return res
+      .status(403)
+      .json({ error: "Unauthorized access, invalid token!" });
+
+  const matched = await resetToken.compareToken(token);
+  if (!matched)
+    return res
+      .status(403)
+      .json({ error: "Unauthorized access, invalid token!" });
+
+  res.json({ message: "your token is valid" });
 };
