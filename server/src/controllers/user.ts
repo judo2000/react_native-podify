@@ -3,7 +3,11 @@ import { isValidObjectId } from "mongoose";
 
 import User from "#/models/user";
 import { CreateUser, VerifyEmailRequest } from "#/@types/user";
-import { sendForgetPasswordLink, sendVerificationMail } from "#/utils/mail";
+import {
+  sendForgetPasswordLink,
+  sendPassResetSuccessEmail,
+  sendVerificationMail,
+} from "#/utils/mail";
 import { generateToken } from "#/utils/helper";
 import EmailVerificationToken from "#/models/emailVerificationToken";
 import PasswordResetToken from "#/models/passwordResetToken";
@@ -111,4 +115,28 @@ export const generateForgetPasswordLink: RequestHandler = async (req, res) => {
 
 export const grantValid: RequestHandler = async (req, res) => {
   res.json({ valid: true });
+};
+
+export const updatePassword: RequestHandler = async (req, res) => {
+  const { password, userId } = req.body;
+
+  const user = await User.findById(userId);
+
+  if (!user) return res.status(403).json({ error: "Unauthorized access" });
+
+  const matched = await user.comparePassword(password);
+  if (matched)
+    return res
+      .status(422)
+      .json({ error: "The new password must be different" });
+
+  user.password = password;
+  await user.save();
+
+  await PasswordResetToken.findOneAndDelete({ owner: user._id });
+
+  // send success email
+  sendPassResetSuccessEmail(user.name, user.email);
+
+  res.json({ message: "Password reset successfully!" });
 };

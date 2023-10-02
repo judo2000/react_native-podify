@@ -7,6 +7,7 @@ import {
   MAILTRAP_USER,
   MAILTRAP_PASS,
   VERIFICATION_EMAIL,
+  SIGN_IN_URL,
 } from "#/utils/variables";
 import { generateTemplate } from "#/mail/template";
 
@@ -86,6 +87,41 @@ export const sendForgetPasswordLink = async (options: Options) => {
       banner: "cid:forget_password",
       link,
       btnTitle: "Reset Password",
+    }),
+    attachments: [
+      {
+        filename: "logo.png",
+        path: path.join(__dirname, "../mail/logo.png"),
+        cid: "logo",
+      },
+      {
+        filename: "forget_password.png",
+        path: path.join(__dirname, "../mail/forget_password.png"),
+        cid: "forget_password",
+      },
+    ],
+  });
+};
+
+export const sendPassResetSuccessEmail = async (
+  name: string,
+  email: string
+) => {
+  const transport = generateMailTransporter();
+
+  const message = `Dear ${name},  your password was just updated.  You can now sign in with your new password.`;
+
+  transport.sendMail({
+    to: email,
+    from: VERIFICATION_EMAIL,
+    subject: "Password Reset Successfully",
+    html: generateTemplate({
+      title: "Password Reset Successfully",
+      message,
+      logo: "cid:logo",
+      banner: "cid:forget_password",
+      link: SIGN_IN_URL,
+      btnTitle: "Sign In",
     }),
     attachments: [
       {
