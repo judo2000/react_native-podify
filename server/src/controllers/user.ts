@@ -3,7 +3,7 @@ import { isValidObjectId } from "mongoose";
 
 import User from "#/models/user";
 import { CreateUser, VerifyEmailRequest } from "#/@types/user";
-import { sendVerificationMail } from "#/utils/mail";
+import { sendForgetPasswordLink, sendVerificationMail } from "#/utils/mail";
 import { generateToken } from "#/utils/helper";
 import EmailVerificationToken from "#/models/emailVerificationToken";
 import PasswordResetToken from "#/models/passwordResetToken";
@@ -83,12 +83,16 @@ export const sendReVerificationToken: RequestHandler = async (req, res) => {
 
 export const generateForgetPasswordLink: RequestHandler = async (req, res) => {
   const { email } = req.body;
-  console.log(email);
+
   const user = await User.findOne({ email });
 
   if (!user) return res.status(404).json({ error: "Account not found!" });
 
   // generate reset password link
+
+  await PasswordResetToken.findOneAndDelete({
+    owner: user._id,
+  });
 
   // create token using crypto
   const token = crypto.randomBytes(36).toString("hex");
@@ -100,5 +104,7 @@ export const generateForgetPasswordLink: RequestHandler = async (req, res) => {
 
   const resetLink = `${PASSWORD_RESET_LINK}?token=${token}&id=${user._id}`;
 
-  res.json({ resetLink });
+  sendForgetPasswordLink({ email: user.email, link: resetLink });
+
+  res.json({ message: "Check your email!" });
 };
