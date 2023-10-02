@@ -34,11 +34,6 @@ export const sendVerificationMail = async (token: string, profile: Profile) => {
 
   const { name, email, userId } = profile;
 
-  await EmailVerificationToken.create({
-    owner: userId,
-    token,
-  });
-
   const welcomeMessage = `Hi ${name}, welcome to Podify!  There are so many things we do for verified users.  Use the given OTP (One-Time-Password) to verificy your email.`;
 
   transport.sendMail({
