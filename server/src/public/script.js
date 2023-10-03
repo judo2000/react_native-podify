@@ -19,14 +19,12 @@ let token, userId;
 const passRegex =
   /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#\$%\^&\*])[a-zA-Z\d!@#\$%\^&\*]+$/;
 
-// get query params i.e. token and id
 window.addEventListener("DOMContentLoaded", async () => {
   const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => {
       return searchParams.get(prop);
     },
   });
-  console.log(params);
   token = params.token;
   userId = params.userId;
 
