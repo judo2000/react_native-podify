@@ -36,5 +36,8 @@ router.post(
   updatePassword
 );
 router.post("/sign-in", validate(SignValidationSchema), signIn);
-
+router.get("/is-auth", (req, res) => {
+  const { authorization } = req.headers;
+  authorization?.split("Bearer ");
+});
 export default router;
