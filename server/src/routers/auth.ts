@@ -8,7 +8,7 @@ import {
   verifyEmail,
 } from "#/controllers/user";
 import User from "#/models/user";
-import { isValidPassResetToken } from "#/middleware/auth";
+import { isValidPassResetToken, mustAuth } from "#/middleware/auth";
 import { validate } from "#/middleware/validator";
 import {
   CreateUserSchema,
@@ -39,27 +39,9 @@ router.post(
   updatePassword
 );
 router.post("/sign-in", validate(SignValidationSchema), signIn);
-router.get("/is-auth", async (req, res) => {
-  const { authorization } = req.headers;
-  const token = authorization?.split("Bearer ")[1];
-  if (!token) return res.status(403).json({ error: "Unauthorized request!" });
-
-  const payload = verify(token, JWT_SECRET) as JwtPayload;
-  const id = payload.userId;
-
-  const user = await User.findById(id);
-  if (!user) return res.status(403).json({ error: "Unauthorized request!" });
-
+router.get("/is-auth", mustAuth, (req, res) => {
   res.json({
-    profile: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      verified: user.verified,
-      avatar: user.avatar?.url,
-      followers: user.followers.length,
-      followings: user.following.length,
-    },
+    profile: req.user,
   });
 });
 export default router;
