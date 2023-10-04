@@ -1,6 +1,6 @@
 import * as yup from "yup";
 import { isValidObjectId } from "mongoose";
-import { categories } from "./audo_category";
+import { categories } from "./audio_category";
 
 export const CreateUserSchema = yup.object().shape({
   name: yup
