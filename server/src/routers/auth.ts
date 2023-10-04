@@ -2,12 +2,14 @@ import {
   create,
   generateForgetPasswordLink,
   grantValid,
+  logout,
+  sendProfile,
   sendReVerificationToken,
   signIn,
   updatePassword,
   updateProfile,
   verifyEmail,
-} from "#/controllers/user";
+} from "#/controllers/auth";
 import { isValidPassResetToken, mustAuth } from "#/middleware/auth";
 import { validate } from "#/middleware/validator";
 import {
@@ -19,7 +21,7 @@ import {
 import { JWT_SECRET } from "#/utils/variables";
 import { Router } from "express";
 import { JwtPayload, verify } from "jsonwebtoken";
-import fileParser, { RequestWithFiles } from "#/middleware/fileParser";
+import fileParser from "#/middleware/fileParser";
 
 const router = Router();
 
@@ -40,12 +42,9 @@ router.post(
   updatePassword
 );
 router.post("/sign-in", validate(SignValidationSchema), signIn);
-router.get("/is-auth", mustAuth, (req, res) => {
-  res.json({
-    profile: req.user,
-  });
-});
+router.get("/is-auth", mustAuth, sendProfile);
 
 router.post("/update-profile", mustAuth, fileParser, updateProfile);
+router.post("/log-out", mustAuth, logout);
 
 export default router;

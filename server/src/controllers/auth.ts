@@ -9,7 +9,7 @@ import {
   sendPassResetSuccessEmail,
   sendVerificationMail,
 } from "#/utils/mail";
-import { generateToken } from "#/utils/helper";
+import { formatProfile, generateToken } from "#/utils/helper";
 import EmailVerificationToken from "#/models/emailVerificationToken";
 import PasswordResetToken from "#/models/passwordResetToken";
 import crypto from "crypto";
@@ -214,5 +214,27 @@ export const updateProfile: RequestHandler = async (
   }
   await user.save();
 
-  res.json({ avatar: user.avatar });
+  res.json({ profile: formatProfile(user) });
+};
+
+export const sendProfile: RequestHandler = (req, res) => {
+  res.json({ profile: req.user });
+};
+
+export const logout: RequestHandler = async (req, res) => {
+  // logout and logout from all
+  const { fromAll } = req.query;
+
+  const token = req.token;
+  const user = await User.findById(req.user.id);
+
+  if (!user) throw new Error("Something went wrong, user not found!");
+
+  // logout fro mall
+  if (fromAll === "yes") user.tokens = [];
+  else user.tokens = user.tokens.filter((t) => t !== token);
+
+  await user.save();
+
+  res.json({ success: true });
 };
