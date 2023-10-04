@@ -17,6 +17,7 @@ import { JWT_SECRET, PASSWORD_RESET_LINK } from "#/utils/variables";
 import { RequestWithFiles } from "#/middleware/fileParser";
 import cloudinary from "#/cloud";
 import formidable from "formidable";
+import path from "path";
 
 export const create: RequestHandler = async (req: CreateUser, res) => {
   const { name, email, password } = req.body;
@@ -194,6 +195,9 @@ export const updateProfile: RequestHandler = async (
 
   if (avatar) {
     // if there is already an avatar file, remove it
+    if (user.avatar?.publicId) {
+      await cloudinary.uploader.destroy(user.avatar.publicId);
+    }
 
     // upload new avatar file
     const { secure_url, public_id } = await cloudinary.uploader.upload(
