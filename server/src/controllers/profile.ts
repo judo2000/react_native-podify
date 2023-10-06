@@ -3,6 +3,7 @@ import User from "#/models/user";
 import Audio, { AudioDocument } from "#/models/audio";
 import { RequestHandler } from "express";
 import { ObjectId, isValidObjectId } from "mongoose";
+import Playlist from "#/models/playlist";
 
 export const updateFollower: RequestHandler = async (req, res) => {
   const { profileId } = req.params;
@@ -128,5 +129,34 @@ export const getPublicProfile: RequestHandler = async (req, res) => {
       follower: user.followers.length,
       avatar: user.avatar?.url,
     },
+  });
+};
+
+export const getPublicPlaylist: RequestHandler = async (req, res) => {
+  const { profileId } = req.params;
+  const { pageNo = "0", limit = "20" } = req.query as paginationQuery;
+
+  if (!isValidObjectId(profileId))
+    return res.status(422).json({ error: "Invalid publicId" });
+
+  const playlist = await Playlist.find({
+    _id: profileId,
+    visibility: "public",
+  })
+    .skip(parseInt(limit) * parseInt(pageNo))
+    .limit(parseInt(limit))
+    .sort("-createdAt");
+
+  if (!playlist) return res.json({ playlist: [] });
+
+  res.json({
+    playlist: playlist.map((item) => {
+      return {
+        id: item._id,
+        title: item.title,
+        itemsCount: item.items.length,
+        visibility: item.visibility,
+      };
+    }),
   });
 };
