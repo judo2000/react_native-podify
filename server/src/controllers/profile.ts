@@ -140,7 +140,7 @@ export const getPublicPlaylist: RequestHandler = async (req, res) => {
     return res.status(422).json({ error: "Invalid publicId" });
 
   const playlist = await Playlist.find({
-    _id: profileId,
+    owner: profileId,
     visibility: "public",
   })
     .skip(parseInt(limit) * parseInt(pageNo))
