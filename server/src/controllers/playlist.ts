@@ -1,6 +1,7 @@
 import { CreatePlaylistRequest, UpdatePlaylistRequest } from "#/@types/audio";
 import Audio from "#/models/audio";
 import Playlist from "#/models/playlist";
+import { INSPECT_MAX_BYTES } from "buffer";
 import { RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
@@ -100,4 +101,22 @@ export const removePlaylist: RequestHandler = async (req, res) => {
   }
 
   res.json({ success: true });
+};
+
+export const getPlaylistByProfile: RequestHandler = async (req, res) => {
+  const data = await Playlist.find({
+    owner: req.user.id,
+    visibility: { $ne: "auto" },
+  }).sort("-createdAt");
+
+  const playlist = data.map((item) => {
+    return {
+      id: item._id,
+      title: item.title,
+      itemsCount: item.items.length,
+      visibility: item.visibility,
+    };
+  });
+
+  res.json({ playlist });
 };
