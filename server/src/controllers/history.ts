@@ -1,3 +1,4 @@
+import { paginationQuery } from "#/@types/misc";
 import History, { historyType } from "#/models/history";
 import { RequestHandler } from "express";
 
@@ -98,7 +99,7 @@ export const removeHistory: RequestHandler = async (req, res) => {
 };
 
 export const getHistories: RequestHandler = async (req, res) => {
-  const { limit = "20", pageNo = "0" } = req.query as pageinationQuery;
+  const { limit = "20", pageNo = "0" } = req.query as paginationQuery;
 
   const histories = await History.aggregate([
     { $match: { owner: req.user.id } },
