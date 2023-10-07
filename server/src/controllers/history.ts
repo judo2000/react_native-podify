@@ -85,7 +85,7 @@ export const removeHistory: RequestHandler = async (req, res) => {
   }
 
   const histories = req.query.histories as string;
-  console.log(histories);
+
   const ids = JSON.parse(histories) as string[];
   await History.findOneAndUpdate(
     { owner: req.user.id },
@@ -95,4 +95,57 @@ export const removeHistory: RequestHandler = async (req, res) => {
   );
 
   res.json({ success: true });
+};
+
+export const getHistories: RequestHandler = async (req, res) => {
+  const { limit = "20", pageNo = "0" } = req.query as pageinationQuery;
+
+  const histories = await History.aggregate([
+    { $match: { owner: req.user.id } },
+    {
+      $project: {
+        all: {
+          $slice: ["$all", parseInt(limit) * parseInt(pageNo), parseInt(limit)],
+        },
+      },
+    },
+    { $unwind: "$all" },
+    {
+      $lookup: {
+        from: "audios",
+        localField: "all.audio",
+        foreignField: "_id",
+        as: "audioInfo",
+      },
+    },
+    { $unwind: "$audioInfo" },
+    {
+      $project: {
+        _id: 0,
+        id: "$all._id",
+        audioId: "$audioInfo._id",
+        date: "$all.date",
+        title: "$audioInfo.title",
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: "%Y-%m-%d", date: "$date" },
+        },
+        audios: { $push: "$$ROOT" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id: "$id",
+        date: "$_id",
+        audios: "$$ROOT.audios",
+      },
+    },
+    { $sort: { date: -1 } },
+  ]);
+
+  res.json({ histories });
 };
