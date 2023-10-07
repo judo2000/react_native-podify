@@ -1,6 +1,5 @@
 import { RequestHandler } from "express";
-
-import passwordResetToken from "#/models/passwordResetToken";
+import PasswordResetToken from "#/models/passwordResetToken";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { JWT_SECRET } from "#/utils/variables";
 import User from "#/models/user";
@@ -8,7 +7,7 @@ import User from "#/models/user";
 export const isValidPassResetToken: RequestHandler = async (req, res, next) => {
   const { token, userId } = req.body;
 
-  const resetToken = await passwordResetToken.findOne({ owner: userId });
+  const resetToken = await PasswordResetToken.findOne({ owner: userId });
   if (!resetToken)
     return res
       .status(403)
@@ -50,6 +49,7 @@ export const mustAuth: RequestHandler = async (req, res, next) => {
 
 export const isVerified: RequestHandler = (req, res, next) => {
   if (!req.user.verified)
-    return res.status(403).json({ error: "Please verify your email address." });
+    return res.status(403).json({ error: "Please verify your email account!" });
+
   next();
 };

@@ -1,4 +1,4 @@
-import { updateHistory } from "#/controllers/history";
+import { removeHistory, updateHistory } from "#/controllers/history";
 import { mustAuth } from "#/middleware/auth";
 import { validate } from "#/middleware/validator";
 import { UpdateHistoryValidationSchema } from "#/utils/validationSchema";
@@ -12,5 +12,6 @@ router.post(
   validate(UpdateHistoryValidationSchema),
   updateHistory
 );
+router.delete("/", mustAuth, removeHistory);
 
 export default router;
